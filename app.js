@@ -113,6 +113,43 @@ const I18N = {
     fContact: "Kontakt",
     fNote: "Notiz",
     required: "Bitte die markierten Felder ausfüllen.",
+    navOverview: "Überblick",
+    navInvoices: "Rechnungen",
+    navOffers: "Angebote",
+    navOrders: "Bestellungen",
+    navReturns: "Rückgaben",
+    navMovements: "Eingang/Ausgang",
+    navSuppliers: "Lieferanten",
+    offersTitle: "Angebote",
+    offersHint: "Angebote bleiben auf diesem Gerät. Es wird nichts per E-Mail oder WhatsApp versendet.",
+    addOffer: "Angebot erfassen",
+    editOffer: "Angebot bearbeiten",
+    emptyOffers: "Noch kein Angebot in diesem Zeitraum.",
+    offerOpen: "Offen",
+    offerSent: "Gesendet",
+    offerAccepted: "Angenommen",
+    offerRejected: "Abgelehnt",
+    fCustomer: "Kunde",
+    fVehicle: "Fahrzeug",
+    fItems: "Beschreibung / Positionen",
+    fValidUntil: "Gültig bis",
+    fFollowDate: "Nächster Kontakt",
+    fFollowNote: "Follow-up Notiz",
+    toInvoice: "In Rechnung",
+    invoiced: "Bereits in Rechnung",
+    followTitle: "Follow-up heute / überfällig",
+    followHint: "Nächster Kontakt aus Ihren Angeboten. Nur lokal, es wird nichts versendet.",
+    emptyFollow: "Kein Follow-up für heute oder überfällig.",
+    followToday: "Heute",
+    followLate: "Überfällig",
+    followDone: "Erledigt",
+    kpiOffers: "Offene Angebote",
+    kpiOffersSub: "Offen und gesendet, ohne Storno",
+    kpiAccept: "Annahmequote",
+    kpiAcceptSub: "Angenommen unter abgeschlossenen",
+    colCustomer: "Kunde",
+    colValid: "Gültig bis",
+    colFollow: "Follow-up",
     footerLeft: "EO Fahrzeuge · KFZ-Meisterbetrieb · Breite Heerstraße 8–10 · 75365 Calw",
     footerRight: "Lokale Arbeitsdatei. Nichts unwiderruflich löschen — Storno verwenden. Keine Passwörter in Dateien."
   },
@@ -230,20 +267,58 @@ const I18N = {
     fContact: "Kontakt",
     fNote: "Bilješka",
     required: "Molimo popunite označena polja.",
+    navOverview: "Pregled",
+    navInvoices: "Računi",
+    navOffers: "Ponude",
+    navOrders: "Narudžbe",
+    navReturns: "Povrati",
+    navMovements: "Ulaz/Izlaz",
+    navSuppliers: "Dobavljači",
+    offersTitle: "Ponude",
+    offersHint: "Ponude ostaju na ovom uređaju. Ništa se ne šalje mailom ni WhatsAppom.",
+    addOffer: "Unesi ponudu",
+    editOffer: "Uredi ponudu",
+    emptyOffers: "U ovom razdoblju još nema ponuda.",
+    offerOpen: "Otvorena",
+    offerSent: "Poslana",
+    offerAccepted: "Prihvaćena",
+    offerRejected: "Odbijena",
+    fCustomer: "Kupac",
+    fVehicle: "Vozilo",
+    fItems: "Opis / stavke",
+    fValidUntil: "Važi do",
+    fFollowDate: "Sljedeći kontakt",
+    fFollowNote: "Bilješka za follow-up",
+    toInvoice: "U račun",
+    invoiced: "Već u računu",
+    followTitle: "Follow-up danas / kasni",
+    followHint: "Sljedeći kontakt iz vaših ponuda. Samo lokalno, ništa se ne šalje.",
+    emptyFollow: "Nema follow-upa za danas ili u kašnjenju.",
+    followToday: "Danas",
+    followLate: "Kasni",
+    followDone: "Urađeno",
+    kpiOffers: "Otvorene ponude",
+    kpiOffersSub: "Otvorene i poslane, bez storna",
+    kpiAccept: "Stopa prihvata",
+    kpiAcceptSub: "Prihvaćene među zaključenim",
+    colCustomer: "Kupac",
+    colValid: "Važi do",
+    colFollow: "Follow-up",
     footerLeft: "EO Fahrzeuge · KFZ majstorska radionica · Breite Heerstraße 8–10 · 75365 Calw",
     footerRight: "Podaci na ovom uređaju. Ništa ne brisati trajno — koristite storno. Lozinke nikad u fajl."
   }
 };
 
 const DB_NAME = "eo-werkstatt-office";
-const DB_VERSION = 1;
-const STORES = ["invoices", "orders", "returns", "movements", "suppliers"];
+const DB_VERSION = 2;
+const STORES = ["invoices", "orders", "returns", "movements", "suppliers", "offers"];
 
 const state = {
   lang: "de",
   month: "all",
+  view: "overview",
   db: null,
-  data: { invoices: [], orders: [], returns: [], movements: [], suppliers: [] },
+  data: { invoices: [], orders: [], returns: [], movements: [], suppliers: [], offers: [] },
   editing: null,
   pendingImage: null
 };
@@ -317,7 +392,7 @@ function txDone(tx) {
 }
 
 async function loadAll() {
-  const data = { invoices: [], orders: [], returns: [], movements: [], suppliers: [] };
+  const data = { invoices: [], orders: [], returns: [], movements: [], suppliers: [], offers: [] };
   await Promise.all(
     STORES.map(
       (name) =>
@@ -337,6 +412,7 @@ async function loadAll() {
   data.orders.sort(sortDate);
   data.returns.sort(sortDate);
   data.movements.sort(sortDate);
+  data.offers.sort(sortDate);
   data.suppliers.sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "de"));
   state.data = data;
 }
@@ -366,7 +442,13 @@ function kpis(month) {
   const breakEven = netExpenses;
   const roi = expenses === 0 ? 0 : (result / expenses) * 100;
   const coverage = breakEven === 0 ? 0 : (revenue / Math.max(breakEven, 0.0001)) * 100;
-  return { revenue, expenses, returnsSum, netExpenses, result, breakEven, roi, coverage };
+  const offerRows = active(state.data.offers || [], month, "date");
+  const pipeline = offerRows.filter((row) => row.status === "open" || row.status === "sent");
+  const offersOpen = pipeline.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  const decided = offerRows.filter((row) => row.status === "accepted" || row.status === "rejected");
+  const accepted = decided.filter((row) => row.status === "accepted").length;
+  const acceptRate = decided.length ? (accepted / decided.length) * 100 : null;
+  return { revenue, expenses, returnsSum, netExpenses, result, breakEven, roi, coverage, offersOpen, acceptRate };
 }
 
 function supplierStats(name, month) {
@@ -434,7 +516,7 @@ function stornoTag(row) {
 
 function emptyBox(message, open) {
   return `<div class="empty-state"><p>${message}</p><button class="btn btn-yellow btn-small" type="button" data-open="${open}">${t(
-    { invoice: "addInvoice", order: "addOrder", return: "addReturn", movement: "addMovement", supplier: "addSupplier" }[open]
+    { invoice: "addInvoice", order: "addOrder", return: "addReturn", movement: "addMovement", supplier: "addSupplier", offer: "addOffer" }[open]
   )}</button></div>`;
 }
 
@@ -463,6 +545,10 @@ function renderKpis() {
     document.getElementById("break-bar").style.width = `${Math.min(Math.max(k.coverage, 0), 100)}%`;
   }
   document.getElementById("kpi-roi").textContent = k.expenses === 0 ? "—" : `${k.roi.toFixed(1).replace(".", ",")}%`;
+  const offersEl = document.getElementById("kpi-offers");
+  if (offersEl) offersEl.textContent = money(k.offersOpen);
+  const acceptEl = document.getElementById("kpi-accept");
+  if (acceptEl) acceptEl.textContent = k.acceptRate == null ? "—" : `${k.acceptRate.toFixed(1).replace(".", ",")}%`;
 }
 
 function renderInvoices() {
@@ -587,15 +673,103 @@ function renderSuppliers() {
     .join("");
 }
 
+function offerStatusLabel(code) {
+  return { open: t("offerOpen"), sent: t("offerSent"), accepted: t("offerAccepted"), rejected: t("offerRejected") }[code] || code;
+}
+
+function renderOffers() {
+  const root = document.getElementById("offers-view");
+  if (!root) return;
+  const rows = (state.data.offers || []).filter((row) => inMonth(row.date, state.month));
+  if (!rows.length) {
+    root.innerHTML = emptyBox(t("emptyOffers"), "offer");
+    return;
+  }
+  root.innerHTML = tableWrap(
+    `<th>${t("colDate")}</th><th>${t("colNr")}</th><th>${t("colCustomer")}</th><th>${t("colItem")}</th><th class="num">${t("colAmount")}</th><th>${t("colValid")}</th><th>${t("colStatus")}</th><th></th>`,
+    rows
+      .map((row) => {
+        const canBill = row.status === "accepted" && !row.storno && !row.invoiceId;
+        const billed = row.invoiceId ? `<div class="muted">${t("invoiced")}</div>` : "";
+        const action = canBill
+          ? `<button class="btn btn-yellow btn-small" type="button" data-to-invoice="${row.id}">${t("toInvoice")}</button>`
+          : billed;
+        return `<tr class="clickable${row.storno ? " row-neg" : ""}" data-edit="offer" data-id="${row.id}">
+          <td>${shortDate(row.date)}${stornoTag(row)}</td>
+          <td>${row.number || "—"}</td>
+          <td>${row.customer || "—"}<div class="muted">${row.vehicle || ""}</div></td>
+          <td>${row.items || "—"}</td>
+          ${amountCell(Number(row.amount || 0))}
+          <td>${row.validUntil ? shortDate(row.validUntil) : "—"}</td>
+          <td class="status">${row.storno ? t("storno") : offerStatusLabel(row.status)}</td>
+          <td>${action}</td>
+        </tr>`;
+      })
+      .join("")
+  );
+}
+
+function pendingFollowUps() {
+  const today = todayIso();
+  return (state.data.offers || []).filter((row) => {
+    if (row.storno || row.followUpDone || !row.followUpDate) return false;
+    return row.followUpDate <= today;
+  }).sort((a, b) => String(a.followUpDate).localeCompare(String(b.followUpDate)));
+}
+
+function renderFollowUps() {
+  const root = document.getElementById("followups-view");
+  if (!root) return;
+  const rows = pendingFollowUps();
+  if (!rows.length) {
+    root.innerHTML = `<div class="empty-state"><p>${t("emptyFollow")}</p></div>`;
+    return;
+  }
+  const today = todayIso();
+  root.innerHTML = `<div class="follow-list">${rows
+    .map((row) => {
+      const late = row.followUpDate < today;
+      const when = late ? t("followLate") : t("followToday");
+      return `<article class="follow-item">
+        <div>
+          <div class="when ${late ? "late" : "today"}">${when} · ${shortDate(row.followUpDate)}</div>
+          <strong>${row.number || "—"} · ${row.customer || "—"}</strong>
+          <div class="muted">${row.followUpNote || row.items || ""}</div>
+        </div>
+        <button class="btn btn-yellow btn-small" type="button" data-follow-done="${row.id}">${t("followDone")}</button>
+      </article>`;
+    })
+    .join("")}</div>`;
+}
+
+function setView(view) {
+  const next = view || "overview";
+  state.view = next;
+  document.querySelectorAll("[data-view]").forEach((el) => {
+    el.classList.toggle("is-active", el.dataset.view === next);
+  });
+  document.querySelectorAll("[data-nav]").forEach((button) => {
+    button.setAttribute("aria-selected", String(button.dataset.nav === next));
+  });
+  try {
+    localStorage.setItem("eo-office-view", next);
+  } catch (err) {
+    /* ignore */
+  }
+}
+
 function render() {
   applyI18n();
   fillMonthFilter();
   renderKpis();
   renderInvoices();
+  renderOffers();
+  renderFollowUps();
   renderOrders();
   renderReturns();
   renderMovements();
   renderSuppliers();
+  setView(state.view);
 }
 
 function optionList(values, selected, emptyLabel) {
@@ -651,10 +825,10 @@ function openForm(type, id) {
   state.pendingImage = record && record.image ? record.image : null;
   document.getElementById("form-title").textContent = t(
     record
-      ? { invoice: "editInvoice", order: "editOrder", return: "editReturn", movement: "editMovement", supplier: "editSupplier" }[type]
-      : { invoice: "addInvoice", order: "addOrder", return: "addReturn", movement: "addMovement", supplier: "addSupplier" }[type]
+      ? { invoice: "editInvoice", order: "editOrder", return: "editReturn", movement: "editMovement", supplier: "editSupplier", offer: "editOffer" }[type]
+      : { invoice: "addInvoice", order: "addOrder", return: "addReturn", movement: "addMovement", supplier: "addSupplier", offer: "addOffer" }[type]
   );
-  document.getElementById("form-hint").textContent = type === "invoice" ? t("fPhotoHint") : "";
+  document.getElementById("form-hint").textContent = type === "invoice" ? t("fPhotoHint") : type === "offer" ? t("offersHint") : "";
   document.getElementById("entry-form").innerHTML = formHtml(type, record || {});
   bindFormExtras(type, record || {});
   const dialog = document.getElementById("form-dialog");
@@ -662,7 +836,7 @@ function openForm(type, id) {
 }
 
 function storeName(type) {
-  return { invoice: "invoices", order: "orders", return: "returns", movement: "movements", supplier: "suppliers" }[type];
+  return { invoice: "invoices", order: "orders", return: "returns", movement: "movements", supplier: "suppliers", offer: "offers" }[type];
 }
 
 function supplierNames() {
@@ -752,6 +926,40 @@ function formHtml(type, row) {
     </div>`;
   }
 
+  if (type === "offer") {
+    const canBill = row.id && row.status === "accepted" && !row.storno && !row.invoiceId;
+    const offerActions = `<div class="form-actions span-2">
+    <button class="btn btn-yellow" type="submit">${t("save")}</button>
+    <button class="btn btn-ghost-ink" type="button" id="form-cancel">${t("cancel")}</button>
+    ${canBill ? `<button class="btn btn-yellow" type="button" id="form-to-invoice">${t("toInvoice")}</button>` : row.invoiceId ? `<span class="hint">${t("invoiced")}</span>` : ""}
+    ${
+      row.id
+        ? row.storno
+          ? `<button class="btn btn-ghost-ink" type="button" id="form-unstorno">${t("undoStorno")}</button>`
+          : `<button class="btn btn-danger" type="button" id="form-storno">${t("storno")}</button>`
+        : ""
+    }
+  </div>`;
+    return `<div class="form-grid">
+      ${field(t("fDate"), input("date", "date", row.date || todayIso(), true))}
+      ${field(t("fNumber"), input("number", "text", row.number || "", true))}
+      ${field(t("fCustomer"), input("customer", "text", row.customer || "", true))}
+      ${field(t("fVehicle"), input("vehicle", "text", row.vehicle || "", false))}
+      ${field(t("fAmount"), input("amount", "number", row.amount ?? "", true, `step="0.01" inputmode="decimal"`))}
+      ${field(t("fValidUntil"), input("validUntil", "date", row.validUntil || "", false))}
+      ${field(t("fStatus"), `<select name="status">${optionList([
+        { value: "open", label: t("offerOpen") },
+        { value: "sent", label: t("offerSent") },
+        { value: "accepted", label: t("offerAccepted") },
+        { value: "rejected", label: t("offerRejected") }
+      ], row.status || "open")}</select>`)}
+      ${field(t("fFollowDate"), input("followUpDate", "date", row.followUpDate || "", false))}
+      ${field(t("fItems"), `<textarea name="items">${escapeHtml(row.items || "")}</textarea>`, true)}
+      ${field(t("fFollowNote"), `<textarea name="followUpNote">${escapeHtml(row.followUpNote || "")}</textarea>`, true)}
+      ${offerActions}
+    </div>`;
+  }
+
   return `<div class="form-grid">
     ${field(t("fName"), input("name", "text", row.name || "", true), true)}
     ${field(t("fCity"), input("city", "text", row.city || "", false))}
@@ -768,6 +976,8 @@ function bindFormExtras(type, row) {
   if (stornoBtn) stornoBtn.addEventListener("click", () => toggleStorno(type, row.id, true));
   const unstornoBtn = form.querySelector("#form-unstorno");
   if (unstornoBtn) unstornoBtn.addEventListener("click", () => toggleStorno(type, row.id, false));
+  const toInv = form.querySelector("#form-to-invoice");
+  if (toInv) toInv.addEventListener("click", () => offerToInvoice(row.id));
   if (type === "invoice") {
     const inputEl = form.querySelector("#photo-input");
     const preview = form.querySelector("#photo-preview");
@@ -893,6 +1103,26 @@ async function saveForm(event) {
       storno: existing.storno || false
     };
     if (record.partner) await rememberSupplier(record.partner);
+  } else if (type === "offer") {
+    const prevDate = existing.followUpDate || "";
+    const nextDate = raw.followUpDate || "";
+    record = {
+      ...existing,
+      id,
+      date: raw.date,
+      number: raw.number,
+      customer: raw.customer,
+      vehicle: raw.vehicle || "",
+      items: raw.items || "",
+      amount: numOrEmpty(raw.amount),
+      validUntil: raw.validUntil || "",
+      status: ["open", "sent", "accepted", "rejected"].includes(raw.status) ? raw.status : "open",
+      followUpDate: nextDate,
+      followUpNote: raw.followUpNote || "",
+      followUpDone: nextDate && nextDate !== prevDate ? false : existing.followUpDone || false,
+      invoiceId: existing.invoiceId || "",
+      storno: existing.storno || false
+    };
   } else {
     record = {
       ...existing,
@@ -975,6 +1205,8 @@ function exportExcel() {
     { Feld: "Ergebnis / Rezultat", Wert: k.result },
     { Feld: "Break-even", Wert: k.breakEven },
     { Feld: "ROI %", Wert: Number(k.roi.toFixed(2)) },
+    { Feld: "Offene Angebote / Otvorene ponude", Wert: k.offersOpen },
+    { Feld: "Annahmequote / Stopa prihvata %", Wert: k.acceptRate == null ? "" : Number(k.acceptRate.toFixed(2)) },
     { Feld: "Monat", Wert: state.month }
   ];
   const invoices = state.data.invoices.map((row) => ({
@@ -998,6 +1230,7 @@ function exportExcel() {
     XLSX.utils.book_append_sheet(book, XLSX.utils.json_to_sheet(state.data.returns), "Rueckgaben");
     XLSX.utils.book_append_sheet(book, XLSX.utils.json_to_sheet(state.data.movements), "Eingang-Ausgang");
     XLSX.utils.book_append_sheet(book, XLSX.utils.json_to_sheet(state.data.suppliers), "Lieferanten");
+    XLSX.utils.book_append_sheet(book, XLSX.utils.json_to_sheet(state.data.offers || []), "Angebote");
     XLSX.writeFile(book, filename);
   } else {
     const lines = ["Feld;Wert"].concat(kpiRows.map((row) => `${row.Feld};${row.Wert}`));
@@ -1006,7 +1239,60 @@ function exportExcel() {
   flashButton(document.getElementById("export-xlsx"), "exportDone");
 }
 
+async function offerToInvoice(offerId) {
+  const offer = (state.data.offers || []).find((row) => row.id === offerId);
+  if (!offer || offer.storno || offer.status !== "accepted" || offer.invoiceId) return;
+  const invoice = {
+    id: uid(),
+    kind: "out",
+    date: todayIso(),
+    number: offer.number ? `AR-${offer.number}` : `AR-${todayIso()}`,
+    partner: offer.customer,
+    net: "",
+    gross: Number(offer.amount || 0),
+    description: [offer.number ? `Angebot ${offer.number}` : "", offer.vehicle || "", offer.items || ""].filter(Boolean).join(" · "),
+    paid: false,
+    image: "",
+    offerId: offer.id,
+    storno: false,
+    created: todayIso(),
+    updated: todayIso()
+  };
+  offer.invoiceId = invoice.id;
+  offer.updated = todayIso();
+  await putRecord("invoices", invoice);
+  await putRecord("offers", offer);
+  await loadAll();
+  closeDialog();
+  state.view = "invoices";
+  render();
+}
+
+async function completeFollowUp(offerId) {
+  const offer = (state.data.offers || []).find((row) => row.id === offerId);
+  if (!offer) return;
+  offer.followUpDone = true;
+  offer.updated = todayIso();
+  await putRecord("offers", offer);
+  await loadAll();
+  render();
+}
+
 function onClick(event) {
+  const followBtn = event.target.closest("[data-follow-done]");
+  if (followBtn) {
+    event.preventDefault();
+    event.stopPropagation();
+    completeFollowUp(followBtn.dataset.followDone);
+    return;
+  }
+  const billBtn = event.target.closest("[data-to-invoice]");
+  if (billBtn) {
+    event.preventDefault();
+    event.stopPropagation();
+    offerToInvoice(billBtn.dataset.toInvoice);
+    return;
+  }
   const openBtn = event.target.closest("[data-open]");
   if (openBtn) {
     openForm(openBtn.dataset.open);
@@ -1020,6 +1306,8 @@ async function init() {
   try {
     const saved = localStorage.getItem("eo-office-lang");
     if (saved === "bs" || saved === "de") state.lang = saved;
+    const savedView = localStorage.getItem("eo-office-view");
+    if (savedView) state.view = savedView;
   } catch (err) {
     /* ignore */
   }
@@ -1049,6 +1337,9 @@ async function init() {
     const file = event.target.files && event.target.files[0];
     if (file) importJsonFile(file);
     event.target.value = "";
+  });
+  document.querySelectorAll("[data-nav]").forEach((button) => {
+    button.addEventListener("click", () => setView(button.dataset.nav));
   });
   document.body.addEventListener("click", onClick);
   document.getElementById("entry-form").addEventListener("submit", saveForm);

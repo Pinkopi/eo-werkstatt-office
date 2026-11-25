@@ -58,6 +58,17 @@
         </div>
       </div>
 
+
+      <nav class="app-nav" aria-label="Bereiche">
+        <button type="button" data-nav="overview" aria-selected="true" data-i18n="navOverview">Überblick</button>
+        <button type="button" data-nav="invoices" aria-selected="false" data-i18n="navInvoices">Rechnungen</button>
+        <button type="button" data-nav="offers" aria-selected="false" data-i18n="navOffers">Angebote</button>
+        <button type="button" data-nav="orders" aria-selected="false" data-i18n="navOrders">Bestellungen</button>
+        <button type="button" data-nav="returns" aria-selected="false" data-i18n="navReturns">Rückgaben</button>
+        <button type="button" data-nav="movements" aria-selected="false" data-i18n="navMovements">Eingang/Ausgang</button>
+        <button type="button" data-nav="suppliers" aria-selected="false" data-i18n="navSuppliers">Lieferanten</button>
+      </nav>
+      <div class="view is-active" data-view="overview">
       <div class="kpis">
         <article class="kpi glass-dark">
           <span class="kpi-label" data-i18n="kpiRevenue">Umsatz</span>
@@ -102,6 +113,21 @@
             <div class="kpi-sub" data-i18n="roiSub">Ergebnis geteilt durch Ausgaben</div>
           </div>
         </article>
+        <article class="kpi glass-dark">
+          <span class="kpi-label" data-i18n="kpiOffers">Offene Angebote</span>
+          <div>
+            <div class="kpi-value" id="kpi-offers">—</div>
+            <div class="kpi-sub" data-i18n="kpiOffersSub">Offen und gesendet, ohne Storno</div>
+          </div>
+        </article>
+        <article class="kpi glass-dark">
+          <span class="kpi-label" data-i18n="kpiAccept">Annahmequote</span>
+          <div>
+            <div class="kpi-value" id="kpi-accept">—</div>
+            <div class="kpi-sub" data-i18n="kpiAcceptSub">Angenommen unter abgeschlossenen</div>
+          </div>
+        </article>
+      </div>
       </div>
     </div>
   </section>
@@ -110,7 +136,7 @@
     <div class="wrap">
       <p class="device-note" data-i18n="deviceNote">Ihre Daten bleiben auf diesem Gerät, im Browser. Es gibt noch keinen Server. Sichern Sie regelmäßig per Excel oder JSON, besonders vor dem Löschen der Browserdaten.</p>
 
-      <section class="glass panel" style="margin-bottom:12px">
+      <section class="glass panel view" data-view="invoices">
         <div class="panel-head">
           <h2 data-i18n="invoicesTitle">Rechnungen</h2>
           <button class="btn btn-yellow btn-small" type="button" data-open="invoice"><span data-i18n="addInvoice">Rechnung erfassen</span></button>
@@ -119,45 +145,58 @@
         <div id="invoices-view"></div>
       </section>
 
-      <div class="grid-2">
-        <section class="glass panel">
+      <section class="glass panel view" data-view="offers">
+        <div class="panel-head">
+          <h2 data-i18n="offersTitle">Angebote</h2>
+          <button class="btn btn-yellow btn-small" type="button" data-open="offer"><span data-i18n="addOffer">Angebot erfassen</span></button>
+        </div>
+        <p class="hint" data-i18n="offersHint">Angebote bleiben auf diesem Gerät. Es wird nichts per E-Mail oder WhatsApp versendet.</p>
+        <div id="offers-view"></div>
+      </section>
+
+      <section class="glass panel view" data-view="orders">
           <div class="panel-head">
             <h2 data-i18n="ordersTitle">Teilebestellungen</h2>
             <button class="btn btn-yellow btn-small" type="button" data-open="order"><span data-i18n="addOrder">Bestellung erfassen</span></button>
           </div>
           <p class="hint" data-i18n="ordersHint">Neue Lieferanten werden automatisch ins Adressbuch übernommen.</p>
           <div id="orders-view"></div>
-        </section>
-        <section class="glass panel">
+      </section>
+      <section class="glass panel view" data-view="returns">
           <div class="panel-head">
             <h2 data-i18n="returnsTitle">Rückgaben</h2>
             <button class="btn btn-yellow btn-small" type="button" data-open="return"><span data-i18n="addReturn">Rückgabe erfassen</span></button>
           </div>
           <p class="hint" data-i18n="returnsHint">An eine Bestellung gebunden. Der Betrag erscheint im Minus und mindert die Ausgaben.</p>
           <div id="returns-view"></div>
-        </section>
-      </div>
+      </section>
 
-      <div class="grid-2b">
-        <section class="glass panel">
+      <section class="glass panel view" data-view="movements">
           <div class="panel-head">
             <h2 data-i18n="flowTitle">Eingang & Ausgang</h2>
             <button class="btn btn-yellow btn-small" type="button" data-open="movement"><span data-i18n="addMovement">Bewegung erfassen</span></button>
           </div>
           <p class="hint" data-i18n="flowHint">Lagerbewegung in der Werkstatt.</p>
           <div id="movements-view"></div>
-        </section>
-        <section class="glass panel">
+      </section>
+      <section class="glass panel view" data-view="suppliers">
           <div class="panel-head">
             <h2 data-i18n="suppliersTitle">Lieferanten</h2>
             <button class="btn btn-yellow btn-small" type="button" data-open="supplier"><span data-i18n="addSupplier">Lieferant anlegen</span></button>
           </div>
           <p class="hint" data-i18n="suppliersHint">Adressbuch aus Ihren Einträgen, plus Umsatz und Rückgaben im gewählten Monat.</p>
           <div id="suppliers-view"></div>
-        </section>
-      </div>
+      </section>
 
-      <section class="glass panel" style="margin-top:12px">
+      <section class="glass panel view is-active" data-view="overview">
+        <div class="panel-head">
+          <h2 data-i18n="followTitle">Follow-up heute / überfällig</h2>
+        </div>
+        <p class="hint" data-i18n="followHint">Nächster Kontakt aus Ihren Angeboten. Nur lokal, es wird nichts versendet.</p>
+        <div id="followups-view"></div>
+      </section>
+
+      <section class="glass panel view is-active" data-view="overview">
         <div class="panel-head">
           <h2 data-i18n="taxTitle">Für Steuerberater</h2>
         </div>

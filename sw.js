@@ -1,5 +1,5 @@
 /* EO Werkstatt Office — static shell cache */
-const CACHE = "eo-office-v2";
+const CACHE = "eo-office-v3";
 const ASSETS = [
   "./",
   "./index.html",
