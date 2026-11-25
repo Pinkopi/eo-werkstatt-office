@@ -1,7 +1,7 @@
 {
-  "name": "EO Werkstatt Office (TEST)",
+  "name": "EO Werkstatt Office",
   "short_name": "EO Office",
-  "description": "Testdashboard für die Werkstatt EO Fahrzeuge in Calw. Nur Testdaten.",
+  "description": "Arbeitsdatei für die Werkstatt EO Fahrzeuge in Calw. Daten bleiben auf diesem Gerät.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

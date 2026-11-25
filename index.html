@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#202622">
-  <meta name="description" content="EO Werkstatt Office — Testdashboard für die KFZ-Meisterwerkstatt in Calw. Nur Testdaten.">
-  <title>EO Werkstatt Office — TEST</title>
+  <meta name="description" content="EO Werkstatt Office — Arbeitsdatei für die KFZ-Meisterwerkstatt in Calw. Daten bleiben auf diesem Gerät.">
+  <title>EO Werkstatt Office</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
@@ -21,7 +21,6 @@
         </span>
       </a>
       <div class="header-actions">
-        <span class="badge-test" data-i18n="testBadge">TESTDATEN</span>
         <div class="lang-switch" role="group" aria-label="Sprache / Jezik">
           <button type="button" data-lang="de" aria-pressed="true">DE</button>
           <button type="button" data-lang="bs" aria-pressed="false">BS</button>
@@ -32,17 +31,30 @@
 
   <section class="hero" id="start">
     <div class="wrap">
-      <p class="eyebrow" data-i18n="eyebrow">Familiengeführte KFZ-Meisterwerkstatt · November 2026</p>
+      <p class="eyebrow" data-i18n="eyebrow">KFZ-Meisterwerkstatt · Calw</p>
       <div class="hero-top">
-        <h1><span data-i18n="titleA">Überblick.</span><br><span data-i18n="titleB">Klar.</span><br><em data-i18n="titleC">Im Blick.</em></h1>
+        <h1><span data-i18n="titleA">Eingang.</span><br><span data-i18n="titleB">Ausgang.</span><br><em data-i18n="titleC">Im Blick.</em></h1>
         <div>
-          <p class="hero-copy" data-i18n="heroCopy">Testdashboard für <strong>EO Fahrzeuge</strong>. Alle Zahlen, Lieferanten und Belege sind frei erfunden und mit TEST gekennzeichnet. Keine echten Buchungen.</p>
-          <div class="hero-actions">
-            <button class="btn btn-yellow" type="button" id="export-btn">
-              <span data-i18n="export">Excel exportieren</span>
-              <span class="arrow">↓</span>
-            </button>
-          </div>
+          <p class="hero-copy" data-i18n="heroCopy">Software zum Arbeiten: Rechnungen, Bestellungen, Rückgaben und Lagerbewegungen selbst erfassen. Die Kennzahlen entstehen aus Ihren Einträgen.</p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <label class="month-field">
+          <span data-i18n="filterMonth">Monat</span>
+          <select id="month-filter"></select>
+        </label>
+        <div class="toolbar-cluster">
+          <button class="btn btn-yellow btn-small" type="button" id="export-xlsx">
+            <span data-i18n="exportXlsx">Excel exportieren</span><span class="arrow">↓</span>
+          </button>
+          <button class="btn btn-ghost btn-small" type="button" id="export-json">
+            <span data-i18n="exportJson">JSON-Sicherung</span>
+          </button>
+          <button class="btn btn-ghost btn-small" type="button" id="import-json-btn">
+            <span data-i18n="importJson">Sicherung laden</span>
+          </button>
+          <input id="import-json" type="file" accept="application/json,.json" hidden>
         </div>
       </div>
 
@@ -51,21 +63,28 @@
           <span class="kpi-label" data-i18n="kpiRevenue">Umsatz</span>
           <div>
             <div class="kpi-value" id="kpi-revenue">—</div>
-            <div class="kpi-sub" data-i18n="kpiRevenueSub">Ausgangrechnungen inkl. Storno</div>
+            <div class="kpi-sub" data-i18n="kpiRevenueSub">Ausgangsrechnungen, ohne Storno</div>
           </div>
         </article>
         <article class="kpi glass-dark">
           <span class="kpi-label" data-i18n="kpiExpenses">Ausgaben</span>
           <div>
             <div class="kpi-value" id="kpi-expenses">—</div>
-            <div class="kpi-sub" data-i18n="kpiExpensesSub">Eingangsrechnungen, Storno und Betrieb</div>
+            <div class="kpi-sub" data-i18n="kpiExpensesSub">Eingangsrechnungen, ohne Storno</div>
+          </div>
+        </article>
+        <article class="kpi glass-dark">
+          <span class="kpi-label" data-i18n="kpiReturns">Rückgaben</span>
+          <div>
+            <div class="kpi-value" id="kpi-returns">—</div>
+            <div class="kpi-sub" data-i18n="kpiReturnsSub">An Lieferanten, im Minus</div>
           </div>
         </article>
         <article class="kpi glass-dark">
           <span class="kpi-label" data-i18n="kpiResult">Ergebnis</span>
           <div>
             <div class="kpi-value" id="kpi-result">—</div>
-            <div class="kpi-sub" data-i18n="kpiResultSub">Umsatz minus Ausgaben</div>
+            <div class="kpi-sub" data-i18n="kpiResultSub">Umsatz minus Ausgaben, plus Rückgaben</div>
           </div>
         </article>
         <article class="kpi glass-dark">
@@ -89,50 +108,33 @@
 
   <main>
     <div class="wrap">
-      <p class="notice" data-i18n="notice">TESTVERSION — keine echten Bestellungen, Rechnungen oder Kundendaten. Buchhaltung folgt später.</p>
+      <p class="device-note" data-i18n="deviceNote">Ihre Daten bleiben auf diesem Gerät, im Browser. Es gibt noch keinen Server. Sichern Sie regelmäßig per Excel oder JSON, besonders vor dem Löschen der Browserdaten.</p>
+
+      <section class="glass panel" style="margin-bottom:12px">
+        <div class="panel-head">
+          <h2 data-i18n="invoicesTitle">Rechnungen</h2>
+          <button class="btn btn-yellow btn-small" type="button" data-open="invoice"><span data-i18n="addInvoice">Rechnung erfassen</span></button>
+        </div>
+        <p class="hint" data-i18n="invoicesHint">Eingang oder Ausgang. Foto vom Mobiltelefon möglich — Texte tragen Sie selbst ein, eine automatische Erkennung kommt später.</p>
+        <div id="invoices-view"></div>
+      </section>
 
       <div class="grid-2">
         <section class="glass panel">
           <div class="panel-head">
-            <h2 data-i18n="ordersTitle">Teilebestellungen aus E-Mail</h2>
-            <p data-i18n="ordersHint">Liste aus dem Posteingang — in dieser Version nur Testdaten, kein Mailabruf.</p>
+            <h2 data-i18n="ordersTitle">Teilebestellungen</h2>
+            <button class="btn btn-yellow btn-small" type="button" data-open="order"><span data-i18n="addOrder">Bestellung erfassen</span></button>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th data-i18n="colDate">Datum</th>
-                  <th data-i18n="colSource">Quelle</th>
-                  <th data-i18n="colSupplier">Lieferant</th>
-                  <th data-i18n="colItem">Position</th>
-                  <th class="num" data-i18n="colQty">Menge</th>
-                  <th class="num" data-i18n="colAmount">Betrag</th>
-                  <th data-i18n="colStatus">Status</th>
-                </tr>
-              </thead>
-              <tbody id="orders-body"></tbody>
-            </table>
-          </div>
+          <p class="hint" data-i18n="ordersHint">Neue Lieferanten werden automatisch ins Adressbuch übernommen.</p>
+          <div id="orders-view"></div>
         </section>
-
         <section class="glass panel">
           <div class="panel-head">
-            <h2 data-i18n="returnsTitle">Rückgaben & Storno</h2>
-            <p data-i18n="returnsHint">Beträge erscheinen bewusst im Minus.</p>
+            <h2 data-i18n="returnsTitle">Rückgaben</h2>
+            <button class="btn btn-yellow btn-small" type="button" data-open="return"><span data-i18n="addReturn">Rückgabe erfassen</span></button>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th data-i18n="colDate">Datum</th>
-                  <th data-i18n="colType">Art</th>
-                  <th data-i18n="colSupplier">Lieferant</th>
-                  <th class="num" data-i18n="colAmount">Betrag</th>
-                </tr>
-              </thead>
-              <tbody id="returns-body"></tbody>
-            </table>
-          </div>
+          <p class="hint" data-i18n="returnsHint">An eine Bestellung gebunden. Der Betrag erscheint im Minus und mindert die Ausgaben.</p>
+          <div id="returns-view"></div>
         </section>
       </div>
 
@@ -140,84 +142,45 @@
         <section class="glass panel">
           <div class="panel-head">
             <h2 data-i18n="flowTitle">Eingang & Ausgang</h2>
-            <p data-i18n="flowHint">Lagerbewegung an der Werkstatt, Testdaten.</p>
+            <button class="btn btn-yellow btn-small" type="button" data-open="movement"><span data-i18n="addMovement">Bewegung erfassen</span></button>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th data-i18n="colDate">Datum</th>
-                  <th data-i18n="colDir">Richtung</th>
-                  <th data-i18n="colItem">Position</th>
-                  <th class="num" data-i18n="colQty">Menge</th>
-                  <th data-i18n="colRef">Referenz</th>
-                </tr>
-              </thead>
-              <tbody id="flow-body"></tbody>
-            </table>
-          </div>
+          <p class="hint" data-i18n="flowHint">Lagerbewegung in der Werkstatt.</p>
+          <div id="movements-view"></div>
         </section>
-
         <section class="glass panel">
           <div class="panel-head">
             <h2 data-i18n="suppliersTitle">Lieferanten</h2>
-            <p class="hint">TEST</p>
+            <button class="btn btn-yellow btn-small" type="button" data-open="supplier"><span data-i18n="addSupplier">Lieferant anlegen</span></button>
           </div>
-          <div class="supplier-list" id="supplier-list"></div>
+          <p class="hint" data-i18n="suppliersHint">Adressbuch aus Ihren Einträgen, plus Umsatz und Rückgaben im gewählten Monat.</p>
+          <div id="suppliers-view"></div>
         </section>
       </div>
 
-      <section class="glass panel" style="margin-bottom:12px">
+      <section class="glass panel" style="margin-top:12px">
         <div class="panel-head">
-          <h2 data-i18n="invoicesTitle">Rechnungen</h2>
-          <p data-i18n="invoicesHint">Eingang, Ausgang und Storno. Beträge inkl. Vorzeichen.</p>
+          <h2 data-i18n="taxTitle">Für Steuerberater</h2>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th data-i18n="colNr">Nummer</th>
-                <th data-i18n="colType">Art</th>
-                <th data-i18n="colPartner">Partner</th>
-                <th class="num" data-i18n="colAmount">Betrag</th>
-              </tr>
-            </thead>
-            <tbody id="invoices-body"></tbody>
-          </table>
+        <div class="empty-state" style="text-align:left;padding-top:8px">
+          <p class="hint" data-i18n="taxBody">Diese Karte bleibt leer. Buchhaltung, GoBD, DATEV und Umsatzsteuer sind nicht Teil dieser Version.</p>
         </div>
       </section>
 
-      <div class="grid-2b">
-        <section class="glass panel">
-          <div class="panel-head">
-            <h2 data-i18n="uploadTitle">Belegfoto</h2>
-            <p data-i18n="uploadHint">Nur Vorschau auf diesem Gerät. Es wird nichts hochgeladen oder gespeichert.</p>
-          </div>
-          <div class="upload" id="upload-zone" role="button" tabindex="0">
-            <strong data-i18n="uploadCta">Bild wählen oder hier ablegen</strong>
-            <span class="hint" data-i18n="uploadNote">JPG, PNG oder WEBP. Vorschau bleibt lokal.</span>
-            <input id="upload-input" type="file" accept="image/*" multiple>
-          </div>
-          <div class="previews" id="previews"></div>
-        </section>
-
-        <section class="glass panel">
-          <div class="panel-head">
-            <h2 data-i18n="taxTitle">Für Steuerberater</h2>
-          </div>
-          <div class="empty">
-            <span class="tag tag-test">TEST · FOLGT / SLIJEDI</span>
-            <p class="hint" data-i18n="taxBody">Diese Karte bleibt in der ersten Version leer. GoBD, DATEV, USt und Mahnwesen kommen später — und nur wenn Amir das ausdrücklich will.</p>
-          </div>
-        </section>
-      </div>
-
       <footer class="footer">
         <span data-i18n="footerLeft">EO Fahrzeuge · KFZ-Meisterbetrieb · Breite Heerstraße 8–10 · 75365 Calw</span>
-        <span data-i18n="footerRight">Nur Testdaten. Nichts löschen. Keine Passwörter in Dateien.</span>
+        <span data-i18n="footerRight">Lokale Arbeitsdatei. Nichts unwiderruflich löschen — Storno verwenden. Keine Passwörter in Dateien.</span>
       </footer>
     </div>
   </main>
+
+  <dialog class="sheet" id="form-dialog">
+    <div class="sheet-card">
+      <button class="dialog-close" type="button" id="dialog-close" aria-label="Schließen">×</button>
+      <h2 id="form-title"></h2>
+      <p class="hint" id="form-hint"></p>
+      <form id="entry-form"></form>
+    </div>
+  </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
   <script src="app.js" defer></script>

@@ -1,10 +1,9 @@
-# EO Werkstatt Office (TEST)
+# EO Werkstatt Office
 
-Statički dashboard za radionicu EO Fahrzeuge, Calw.
+Radni alat za radionicu EO Fahrzeuge, Calw. Statička web aplikacija, podaci ostaju u pregledniku (IndexedDB).
 
-- Svi podaci su lažni i označeni sa **TEST**.
-- Nema pravih narudžbi, računa, lozinki ni ličnih podataka.
+- Start je prazan: sami unosite račune, narudžbe, povrate, ulaz/izlaz i dobavljače.
+- Nema izmišljenih podataka u aplikaciji.
+- Storno označava unos, ne briše ga.
+- Excel i JSON kopija. Servera još nema.
 - Knjigovodstvo (GoBD, DATEV, PDV) nije uključeno.
-- Upload slike računa je samo lokalni pregled, ništa se ne šalje na server.
-
-Otvaranje: otvori `index.html` ili javni raw.githack / GitHub Pages link.
