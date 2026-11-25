@@ -1,0 +1,14 @@
+{
+  "name": "EO Werkstatt Office (TEST)",
+  "short_name": "EO Office",
+  "description": "Testdashboard für die Werkstatt EO Fahrzeuge in Calw. Nur Testdaten.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f6f0",
+  "theme_color": "#202622",
+  "lang": "de",
+  "icons": [
+    { "src": "assets/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
